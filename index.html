@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ganesh Utsav Finance Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -13,6 +13,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        input:focus, textarea:focus, select:focus { scroll-margin-top: 100px; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -390,7 +391,9 @@
             document.getElementById('headerUserName').textContent = currentUser.name;
             document.getElementById('headerUserRole').textContent = currentUser.is_super_user ? 'Admin' : 'Member';
 
-            if (currentUser.is_super_user) {
+            const isAdmin = !!currentUser.is_super_user;
+
+            if (isAdmin) {
                 document.getElementById('adminTab').classList.remove('hidden');
                 document.getElementById('adminBadge').classList.remove('hidden');
             }
@@ -423,27 +426,59 @@
 
         async function loadAllData() {
             console.log('Loading all data...');
-            await Promise.all([loadExpenses(), loadDonations(), loadCategories()]);
-            updateDashboard();
+
+            const isAdmin = !!currentUser?.is_super_user;
+
+            const tasks = [
+                loadExpenses(isAdmin),
+                loadDonations(isAdmin),
+                loadCategories()
+            ];
+
+            if (isAdmin) {
+                tasks.push(loadAdminUsers());
+            }
+
+            await Promise.all(tasks);
+            updateDashboard(isAdmin);
         }
 
-        async function loadExpenses() {
+        async function loadExpenses(isAdmin) {
             console.log('Loading expenses...');
-            const { data, error } = await db.from('expenses').select('*').eq('event_code', currentEventCode).order('created_at', { ascending: false });
+
+            let query = db.from('expenses').select('*').order('created_at', { ascending: false });
+
+            if (!isAdmin) {
+                query = query.eq('event_code', currentEventCode);
+            }
+
+            const { data, error } = await query;
+
             if (error) {
                 console.error('Error loading expenses:', error);
                 return;
             }
+
             console.log('Expenses loaded:', data?.length);
             renderExpenses(data || []);
         }
 
-        async function loadDonations() {
-            const { data, error } = await db.from('donations').select('*').eq('event_code', currentEventCode).order('created_at', { ascending: false });
+        async function loadDonations(isAdmin) {
+            let query = db.from('donations').select('*').order('created_at', { ascending: false });
+
+            if (!isAdmin) {
+                query = query
+                    .eq('event_code', currentEventCode)
+                    .eq('payment_status', 'Paid');
+            }
+
+            const { data, error } = await query;
+
             if (error) {
                 console.error('Error loading donations:', error);
                 return;
             }
+
             renderDonations(data || []);
         }
 
@@ -458,6 +493,105 @@
             const container = document.getElementById('categoriesList');
             container.innerHTML = defaultCategories.map(c => `<div class="p-3 bg-slate-50 rounded-lg"><span class="text-slate-700">${c}</span> <span class="text-xs text-slate-400">(Default)</span></div>`).join('') +
                 custom.map(c => `<div class="p-3 bg-green-50 rounded-lg flex justify-between items-center"><span class="text-slate-700">${c}</span> <button onclick="deleteCategory('${c}')" class="text-red-600 text-sm hover:underline">Delete</button></div>`).join('');
+        }
+
+        async function loadAdminUsers() {
+            const container = document.getElementById('adminUsersList');
+
+            if (!currentUser || !currentUser.is_super_user) {
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    Loading members...
+                </div>
+            `;
+
+            const { data: users, error } = await db
+                .from('users')
+                .select('id, name, mobile, event_code, is_super_user, created_at')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Error loading admin users:', error);
+                container.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                        Failed to load members: ${escapeHtml(error.message)}
+                    </div>
+                `;
+                return;
+            }
+
+            renderAdminUsers(users || []);
+        }
+
+        function renderAdminUsers(users) {
+            const container = document.getElementById('adminUsersList');
+
+            if (!users.length) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <i class="ph ph-users text-4xl mb-3"></i>
+                        <p>No users registered yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-slate-200 rounded-xl hover:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${
+                            user.is_super_user ? 'bg-orange-100' : 'bg-slate-100'
+                        }">
+                            <i class="ph ph-user ${
+                                user.is_super_user ? 'text-orange-600' : 'text-slate-500'
+                            }"></i>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">
+                                ${escapeHtml(user.name || 'Unnamed user')}
+                            </p>
+                            <p class="text-sm text-slate-500">
+                                ${escapeHtml(user.mobile || '')} • 
+                                <span class="font-mono text-xs">${escapeHtml(user.event_code || '')}</span>
+                            </p>
+                            <p class="text-xs text-slate-400">
+                                Joined ${user.created_at
+                                    ? new Date(user.created_at).toLocaleString('en-IN')
+                                    : 'Unknown'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                            user.is_super_user
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-slate-100 text-slate-600'
+                        }">
+                            ${user.is_super_user ? 'Super User' : 'Member'}
+                        </span>
+
+                        ${user.id !== currentUser.id ? `
+                            <button
+                                onclick="toggleUserRole('${user.id}', ${user.is_super_user})"
+                                class="px-3 py-2 rounded-lg text-xs font-semibold ${
+                                    user.is_super_user
+                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                }"
+                            >
+                                ${user.is_super_user ? 'Demote' : 'Promote'}
+                            </button>
+                        ` : `
+                            <span class="text-xs text-slate-400">Current account</span>
+                        `}
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderExpenses(expenses) {
@@ -524,10 +658,20 @@
             container.innerHTML = html;
         }
 
-        async function updateDashboard() {
+        async function updateDashboard(isAdmin) {
+            let expensesQuery = db.from('expenses').select('*');
+            let donationsQuery = db.from('donations').select('*');
+
+            if (!isAdmin) {
+                expensesQuery = expensesQuery.eq('event_code', currentEventCode);
+                donationsQuery = donationsQuery
+                    .eq('event_code', currentEventCode)
+                    .eq('payment_status', 'Paid');
+            }
+
             const [{ data: expenses }, { data: donations }] = await Promise.all([
-                db.from('expenses').select('*').eq('event_code', currentEventCode),
-                db.from('donations').select('*').eq('event_code', currentEventCode)
+                expensesQuery,
+                donationsQuery
             ]);
 
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
@@ -645,6 +789,49 @@
             } catch (err) {
                 showToast('Failed: ' + err.message, 'error');
             }
+        }
+
+        async function toggleUserRole(userId, currentlySuperUser) {
+            if (!currentUser || !currentUser.is_super_user) {
+                showToast('Only superusers can change roles', 'error');
+                return;
+            }
+
+            if (userId === currentUser.id) {
+                showToast('You cannot change your own role', 'error');
+                return;
+            }
+
+            const newRole = !currentlySuperUser;
+            const action = newRole ? 'promote this member' : 'demote this superuser';
+
+            if (!confirm(`Are you sure you want to ${action}?`)) {
+                return;
+            }
+
+            const { error } = await db
+                .from('users')
+                .update({ is_super_user: newRole })
+                .eq('id', userId)
+                .eq('event_code', currentEventCode);
+
+            if (error) {
+                console.error('Role update error:', error);
+                showToast('Role update failed: ' + error.message, 'error');
+                return;
+            }
+
+            showToast(newRole ? 'Member promoted' : 'Superuser demoted');
+            await loadAdminUsers();
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         function switchTab(tab) {
