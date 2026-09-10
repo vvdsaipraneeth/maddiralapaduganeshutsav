@@ -26,12 +26,16 @@
                 <h1 class="text-2xl font-bold text-slate-800">Ganesh Utsav Finance Manager</h1>
                 <p class="text-slate-500 mt-2">Maddiralapadu</p>
             </div>
+
+            <!-- Event Code Selection -->
             <div id="eventCodeSection">
                 <label class="block text-sm font-medium text-slate-700 mb-2">Event Passcode</label>
                 <input type="text" id="eventCodeInput" placeholder="e.g., GANESH2026" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent uppercase tracking-wider">
                 <button onclick="verifyEventCode()" class="w-full mt-4 bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Enter Event</button>
                 <p class="text-xs text-slate-500 mt-3 text-center">Use GANESH2026 for members or ADMIN2026 for admins</p>
             </div>
+
+            <!-- Unified Login (Name + Mobile + PIN) for both GANESH2026 and ADMIN2026 -->
             <div id="userLoginSection" class="hidden">
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                     <p class="text-sm text-orange-700">Event: <span id="displayEventCode" class="font-semibold"></span></p>
@@ -65,7 +69,7 @@
                             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU8tk_qf_l-_l-vL5u5z9klUXMj6-4ZY-xT-tmqFtakUhcQN_CgI6phSU&s" alt="Ganesh" class="w-full h-full object-contain">
                         </div>
                         <div>
-                            <h1 class="text-lg font-bold text-slate-800">Festival Finance</h1>
+                            <h1 class="text-lg font-bold text-slate-800">Ganesh Utsav Finance Manager - Maddiralapadu</h1>
                             <p class="text-xs text-slate-500" id="headerEventCode">GANESH2026</p>
                         </div>
                     </div>
@@ -95,8 +99,8 @@
                     <button onclick="switchTab('expenses')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="expenses"><i class="ph ph-receipt mr-2"></i>Expenses</button>
                     <button onclick="switchTab('donations')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="donations"><i class="ph ph-hand-coins mr-2"></i>Donations</button>
                     <button onclick="switchTab('categories')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="categories"><i class="ph ph-tag mr-2"></i>Categories</button>
+                    <button onclick="switchTab('users')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap hidden" id="usersTabBtn" data-tab="users"><i class="ph ph-users mr-2"></i>Users</button>
                     <button onclick="switchTab('reports')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="reports"><i class="ph ph-chart-pie-slice mr-2"></i>Reports</button>
-                    <button onclick="switchTab('admin')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap hidden" id="adminTab" data-tab="admin"><i class="ph ph-crown mr-2"></i>Admin</button>
                 </div>
             </div>
         </nav>
@@ -131,8 +135,10 @@
                             <form id="expenseForm" class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-2">Category / Item</label>
-                                    <input type="text" id="expenseItem" list="expenseCategories" placeholder="Select category" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500" required>
-                                    <datalist id="expenseCategories"></datalist>
+                                    <select id="expenseItemSelect" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500" required>
+                                        <option value="" disabled selected>Select category</option>
+                                    </select>
+                                    <input type="text" id="expenseItemOther" placeholder="Other (type category)" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 mt-2 hidden">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-2">Amount (₹)</label>
@@ -227,6 +233,19 @@
                 </div>
             </div>
 
+            <!-- Users Tab (Admin only) -->
+            <div id="usersTab" class="tab-content hidden fade-in">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-slate-800">All Users</h3>
+                        <button onclick="loadUsersTab()" class="text-xs px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded">
+                            Refresh
+                        </button>
+                    </div>
+                    <div id="usersList" class="space-y-2"></div>
+                </div>
+            </div>
+
             <div id="reportsTab" class="tab-content hidden fade-in">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                     <h3 class="text-lg font-semibold text-slate-800 mb-4">Export Data</h3>
@@ -240,13 +259,6 @@
                             <p class="text-sm text-emerald-600">Copy formatted report to share</p>
                         </button>
                     </div>
-                </div>
-            </div>
-
-            <div id="adminTab" class="tab-content hidden fade-in">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Admin Management</h3>
-                    <div id="adminUsersList" class="space-y-2"></div>
                 </div>
             </div>
         </main>
@@ -332,10 +344,12 @@
                 return;
             }
             currentEventCode = code;
-            document.getElementById('displayEventCode').textContent = code;
             document.getElementById('headerEventCode').textContent = code;
+
+            // Unified login for both codes: Name + Mobile + PIN
             document.getElementById('eventCodeSection').classList.add('hidden');
             document.getElementById('userLoginSection').classList.remove('hidden');
+            document.getElementById('displayEventCode').textContent = code;
         }
 
         function backToEventCode() {
@@ -345,6 +359,7 @@
             currentEventCode = null;
         }
 
+        // Unified Login (Name + Mobile + PIN) for both GANESH2026 and ADMIN2026
         async function authenticateUser() {
             const name = document.getElementById('userNameInput').value.trim();
             const mobile = document.getElementById('userMobileInput').value.trim();
@@ -378,6 +393,10 @@
 
                 currentUser = user;
                 localStorage.setItem('festivalSession', JSON.stringify({ user: currentUser, eventCode: currentEventCode }));
+
+                // Record login event
+                await db.from('user_logins').insert([{ user_id: user.id }]);
+
                 showApp();
             } catch (err) {
                 console.error(err);
@@ -388,14 +407,14 @@
         function showApp() {
             document.getElementById('authGate').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('headerUserName').textContent = currentUser.name;
+            document.getElementById('headerUserName').textContent = currentUser.name || 'User';
             document.getElementById('headerUserRole').textContent = currentUser.is_super_user ? 'Admin' : 'Member';
 
             const isAdmin = !!currentUser.is_super_user;
 
             if (isAdmin) {
-                document.getElementById('adminTab').classList.remove('hidden');
                 document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('usersTabBtn').classList.remove('hidden'); // Show Users tab for admins
             }
 
             loadAllData();
@@ -435,8 +454,12 @@
                 loadCategories()
             ];
 
-            if (isAdmin) {
-                tasks.push(loadAdminUsers());
+            // Only load Users tab if the tab is currently visible
+            const usersTabVisible = document.getElementById('usersTab') &&
+                                    !document.getElementById('usersTab').classList.contains('hidden');
+
+            if (isAdmin && usersTabVisible) {
+                tasks.push(loadUsersTab());
             }
 
             await Promise.all(tasks);
@@ -484,19 +507,51 @@
 
         async function loadCategories() {
             const { data, error } = await db.from('categories').select('*').eq('event_code', currentEventCode).order('name');
+            if (error) {
+                console.error('Error loading categories:', error);
+                return;
+            }
+
             const custom = (data || []).map(c => c.name);
             const all = [...defaultCategories, ...custom.filter(c => !defaultCategories.includes(c))];
-            
-            const dl = document.getElementById('expenseCategories');
-            dl.innerHTML = all.map(c => `<option value="${c}">`).join('');
-            
+
+            const select = document.getElementById('expenseItemSelect');
+            const otherInput = document.getElementById('expenseItemOther');
+
+            select.innerHTML = '<option value="" disabled selected>Select category</option>';
+
+            all.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+
+            const otherOpt = document.createElement('option');
+            otherOpt.value = '__OTHER__';
+            otherOpt.textContent = 'Other (type category)';
+            select.appendChild(otherOpt);
+
+            select.onchange = () => {
+                if (select.value === '__OTHER__') {
+                    otherInput.classList.remove('hidden');
+                    otherInput.required = true;
+                } else {
+                    otherInput.classList.add('hidden');
+                    otherInput.required = false;
+                    otherInput.value = '';
+                }
+            };
+
             const container = document.getElementById('categoriesList');
             container.innerHTML = defaultCategories.map(c => `<div class="p-3 bg-slate-50 rounded-lg"><span class="text-slate-700">${c}</span> <span class="text-xs text-slate-400">(Default)</span></div>`).join('') +
                 custom.map(c => `<div class="p-3 bg-green-50 rounded-lg flex justify-between items-center"><span class="text-slate-700">${c}</span> <button onclick="deleteCategory('${c}')" class="text-red-600 text-sm hover:underline">Delete</button></div>`).join('');
         }
 
-        async function loadAdminUsers() {
-            const container = document.getElementById('adminUsersList');
+        // ----- Users Tab (Admin only) with login history -----
+
+        async function loadUsersTab() {
+            const container = document.getElementById('usersList');
 
             if (!currentUser || !currentUser.is_super_user) {
                 return;
@@ -504,32 +559,27 @@
 
             container.innerHTML = `
                 <div class="text-center py-8 text-slate-400">
-                    Loading members...
+                    Loading users...
                 </div>
             `;
 
-            const { data: users, error } = await db
+            // Load all users
+            const { data: users, error: usersError } = await db
                 .from('users')
                 .select('id, name, mobile, event_code, is_super_user, created_at')
                 .order('created_at', { ascending: true });
 
-            if (error) {
-                console.error('Error loading admin users:', error);
+            if (usersError) {
+                console.error('Error loading users tab:', usersError);
                 container.innerHTML = `
                     <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                        Failed to load members: ${escapeHtml(error.message)}
+                        Failed to load users: ${escapeHtml(usersError.message)}
                     </div>
                 `;
                 return;
             }
 
-            renderAdminUsers(users || []);
-        }
-
-        function renderAdminUsers(users) {
-            const container = document.getElementById('adminUsersList');
-
-            if (!users.length) {
+            if (!users || users.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10 text-slate-400">
                         <i class="ph ph-users text-4xl mb-3"></i>
@@ -539,64 +589,164 @@
                 return;
             }
 
-            container.innerHTML = users.map(user => `
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-slate-200 rounded-xl hover:bg-slate-50">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${
-                            user.is_super_user ? 'bg-orange-100' : 'bg-slate-100'
-                        }">
-                            <i class="ph ph-user ${
-                                user.is_super_user ? 'text-orange-600' : 'text-slate-500'
-                            }"></i>
-                        </div>
+            // Load all login events
+            const { data: logins, error: loginsError } = await db
+                .from('user_logins')
+                .select('id, user_id, logged_in_at')
+                .in('user_id', users.map(u => u.id))
+                .order('logged_in_at', { ascending: false });
 
-                        <div>
-                            <p class="font-semibold text-slate-800">
-                                ${escapeHtml(user.name || 'Unnamed user')}
-                            </p>
-                            <p class="text-sm text-slate-500">
-                                ${escapeHtml(user.mobile || '')} • 
-                                <span class="font-mono text-xs">${escapeHtml(user.event_code || '')}</span>
-                            </p>
-                            <p class="text-xs text-slate-400">
-                                Joined ${user.created_at
-                                    ? new Date(user.created_at).toLocaleString('en-IN')
-                                    : 'Unknown'}
-                            </p>
-                        </div>
-                    </div>
+            if (loginsError) {
+                console.error('Error loading logins:', loginsError);
+            }
 
-                    <div class="flex items-center gap-2">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                            user.is_super_user
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-slate-100 text-slate-600'
-                        }">
-                            ${user.is_super_user ? 'Super User' : 'Member'}
-                        </span>
+            const loginsByUser = {};
+            (logins || []).forEach(l => {
+                if (!loginsByUser[l.user_id]) loginsByUser[l.user_id] = [];
+                loginsByUser[l.user_id].push(l);
+            });
 
-                        ${user.id !== currentUser.id ? `
-                            <button
-                                onclick="toggleUserRole('${user.id}', ${user.is_super_user})"
-                                class="px-3 py-2 rounded-lg text-xs font-semibold ${
-                                    user.is_super_user
-                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                }"
-                            >
-                                ${user.is_super_user ? 'Demote' : 'Promote'}
-                            </button>
-                        ` : `
-                            <span class="text-xs text-slate-400">Current account</span>
-                        `}
-                    </div>
-                </div>
-            `).join('');
+            renderUsersTab(users, loginsByUser);
         }
+
+        async function deleteLogin(loginId) {
+            if (!currentUser || !currentUser.is_super_user) {
+                showToast('Only admins can delete login records', 'error');
+                return;
+            }
+
+            if (!confirm('Delete this login record?')) {
+                return;
+            }
+
+            const { error } = await db
+                .from('user_logins')
+                .delete()
+                .eq('id', loginId);
+
+            if (error) {
+                console.error('Delete login error:', error);
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+
+            showToast('Login record deleted');
+            await loadUsersTab();
+        }
+
+        async function deleteUser(userId) {
+            if (!currentUser || !currentUser.is_super_user) {
+                showToast('Only admins can delete users', 'error');
+                return;
+            }
+
+            if (userId === currentUser.id) {
+                showToast('You cannot delete your own account', 'error');
+                return;
+            }
+
+            if (!confirm('Delete this user? This will also remove all their login records.')) {
+                return;
+            }
+
+            // Delete user (cascade will remove their user_logins)
+            const { error } = await db
+                .from('users')
+                .delete()
+                .eq('id', userId);
+
+            if (error) {
+                console.error('Delete user error:', error);
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+
+            showToast('User deleted');
+            await loadUsersTab();
+        }
+
+        function renderUsersTab(users, loginsByUser) {
+            const container = document.getElementById('usersList');
+
+            container.innerHTML = users.map(user => {
+                const displayName = user.name || 'Unnamed user';
+                const displayContact = user.mobile || '-';
+                const userLogins = loginsByUser[user.id] || [];
+
+                return `
+                <div class="p-4 border border-slate-200 rounded-xl hover:bg-slate-50">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${
+                                user.is_super_user ? 'bg-orange-100' : 'bg-slate-100'
+                            }">
+                                <i class="ph ph-user ${
+                                    user.is_super_user ? 'text-orange-600' : 'text-slate-500'
+                                }"></i>
+                            </div>
+
+                            <div>
+                                <p class="font-semibold text-slate-800">
+                                    ${escapeHtml(displayName)}
+                                </p>
+                                <p class="text-sm text-slate-500">
+                                    ${escapeHtml(displayContact)} • 
+                                    <span class="font-mono text-xs">${escapeHtml(user.event_code || '')}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                                user.is_super_user
+                                    ? 'bg-orange-100 text-orange-700'
+                                    : 'bg-slate-100 text-slate-600'
+                            }">
+                                ${user.is_super_user ? 'Super User' : 'Member'}
+                            </span>
+
+                            ${user.id !== currentUser.id ? `
+                                <button
+                                    onclick="deleteUser('${user.id}')"
+                                    class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                >
+                                    Delete user
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${userLogins.length > 0 ? `
+                        <div class="mt-3 space-y-1">
+                            <p class="text-xs font-medium text-slate-600">Login history:</p>
+                            <div class="max-h-40 overflow-y-auto space-y-1">
+                                ${userLogins.map(l => `
+                                    <div class="flex items-center justify-between text-sm bg-slate-50 rounded px-2 py-1">
+                                        <span class="text-slate-700">
+                                            Joined: ${new Date(l.logged_in_at).toLocaleString('en-IN')}
+                                        </span>
+                                        <button
+                                            onclick="deleteLogin('${l.id}')"
+                                            class="text-red-600 text-xs hover:underline"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : `
+                        <p class="mt-2 text-xs text-slate-400">No login records yet.</p>
+                    `}
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ----- Existing renderers & handlers -----
 
         function renderExpenses(expenses) {
             const container = document.getElementById('expensesList');
-            console.log('Rendering', expenses.length, 'expenses');
             
             if (!expenses.length) {
                 container.innerHTML = '<div class="text-center py-12 text-slate-400"><i class="ph ph-receipt text-4xl mb-3"></i><p>No expenses yet</p></div>';
@@ -698,8 +848,6 @@
         async function confirmDelete() {
             if (!deleteTarget) return;
             
-            console.log('Deleting', deleteTarget.type, deleteTarget.id);
-            
             try {
                 const table = deleteTarget.type === 'expense' ? 'expenses' : 'donations';
                 const { data, error } = await db.from(table).delete().eq('id', deleteTarget.id).select();
@@ -710,13 +858,11 @@
                     closeDeleteModal();
                     return;
                 }
-                
-                console.log('Delete successful, rows deleted:', data);
+
                 showToast('Deleted successfully!');
                 closeDeleteModal();
                 
                 setTimeout(() => {
-                    console.log('Reloading data after delete...');
                     loadAllData();
                 }, 500);
                 
@@ -729,19 +875,36 @@
 
         document.getElementById('expenseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const select = document.getElementById('expenseItemSelect');
+            const otherInput = document.getElementById('expenseItemOther');
+
+            let itemValue;
+            if (select.value === '__OTHER__') {
+                itemValue = otherInput.value.trim();
+                if (!itemValue) {
+                    showToast('Enter category name', 'error');
+                    return;
+                }
+            } else {
+                itemValue = select.value;
+            }
+
             try {
                 await db.from('expenses').insert([{
                     event_code: currentEventCode,
-                    item: document.getElementById('expenseItem').value,
+                    item: itemValue,
                     amount: parseFloat(document.getElementById('expenseAmount').value),
                     payment_mode: document.querySelector('input[name="expenseMode"]:checked').value,
-                    paid_by: currentUser.name,
-                    mobile: currentUser.mobile,
+                    paid_by: currentUser.name || 'User',
+                    mobile: currentUser.mobile || '',
                     spender_name: document.getElementById('spenderName').value || null,
                     notes: document.getElementById('expenseNotes').value
                 }]);
                 showToast('Expense added!');
                 e.target.reset();
+                otherInput.classList.add('hidden');
+                otherInput.required = false;
                 loadAllData();
             } catch (err) {
                 showToast('Failed: ' + err.message, 'error');
@@ -758,7 +921,7 @@
                     payment_mode: document.querySelector('input[name="donationMode"]:checked').value,
                     payment_status: document.getElementById('paymentStatus').value,
                     collector_name: document.getElementById('collectorName').value,
-                    collector_mobile: currentUser.mobile
+                    collector_mobile: currentUser.mobile || ''
                 }]);
                 showToast('Donation recorded!');
                 e.target.reset();
@@ -822,7 +985,7 @@
             }
 
             showToast(newRole ? 'Member promoted' : 'Superuser demoted');
-            await loadAdminUsers();
+            await loadUsersTab();
         }
 
         function escapeHtml(value) {
@@ -844,6 +1007,11 @@
             const active = document.querySelector(`[data-tab="${tab}"]`);
             active.classList.add('active', 'border-orange-500', 'text-orange-600');
             active.classList.remove('border-transparent', 'text-slate-600');
+
+            // If switching to Users tab, load it
+            if (tab === 'users' && currentUser?.is_super_user) {
+                loadUsersTab();
+            }
         }
 
         function showToast(msg, type = 'success') {
@@ -893,7 +1061,7 @@
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
             const totalExp = (expenses || []).reduce((s, e) => s + e.amount, 0);
             
-            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\n_Generated via Festival Finance_`;
+            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\nGanesh Utsav Finance Manager - Maddiralapadu`;
             
             await navigator.clipboard.writeText(msg);
             showToast('Copied to clipboard!');
