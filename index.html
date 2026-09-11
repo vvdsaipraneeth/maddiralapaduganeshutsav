@@ -32,7 +32,7 @@
                 <label class="block text-sm font-medium text-slate-700 mb-2">Event Passcode</label>
                 <input type="text" id="eventCodeInput" placeholder="e.g., GANESH2026" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent uppercase tracking-wider">
                 <button onclick="verifyEventCode()" class="w-full mt-4 bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Enter Event</button>
-                <p class="text-xs text-slate-500 mt-3 text-center">Use GANESH2026 for members or ADMIN2026 for admins</p>
+                <p class="text-xs text-slate-500 mt-3 text-center"> Om Ganeshaya Namaha</p>
             </div>
 
             <!-- Unified Login (Name + Mobile + PIN) for both GANESH2026 and ADMIN2026 -->
@@ -340,7 +340,7 @@
                 return;
             }
             if (code !== MEMBER_EVENT_CODE && code !== ADMIN_EVENT_CODE) {
-                showToast('Invalid code. Use GANESH2026 or ADMIN2026', 'error');
+                showToast('Invalid code. Use GANESH2026', 'error');
                 return;
             }
             currentEventCode = code;
