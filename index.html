@@ -32,29 +32,61 @@
                 <label class="block text-sm font-medium text-slate-700 mb-2">Event Passcode</label>
                 <input type="text" id="eventCodeInput" placeholder="e.g., GANESH2026" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent uppercase tracking-wider">
                 <button onclick="verifyEventCode()" class="w-full mt-4 bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Enter Event</button>
-                <p class="text-xs text-slate-500 mt-3 text-center"> Om Ganeshaya Namaha</p>
+                <p class="text-xs text-slate-500 mt-3 text-center">Om Ganeshaya Namaha</p>
             </div>
 
-            <!-- Unified Login (Name + Mobile + PIN) for both GANESH2026 and ADMIN2026 -->
-            <div id="userLoginSection" class="hidden">
+            <!-- After code: choose Login or Sign up -->
+            <div id="authChoiceSection" class="hidden">
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-                    <p class="text-sm text-orange-700">Event: <span id="displayEventCode" class="font-semibold"></span></p>
+                    <p class="text-sm text-orange-700">Event: <span id="choiceEventCode" class="font-semibold"></span></p>
+                </div>
+                <p class="text-sm text-slate-600 mb-4">Are you a new user or returning user?</p>
+                <div class="space-y-3">
+                    <button onclick="showSignup()" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Sign up (New User)</button>
+                    <button onclick="showLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Login (Returning User)</button>
+                    <button onclick="backToEventCode()" class="w-full text-slate-600 py-2 text-sm hover:text-slate-800">← Change Event Code</button>
+                </div>
+            </div>
+
+            <!-- Sign up: Name + Mobile + PIN -->
+            <div id="signupSection" class="hidden">
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                    <p class="text-sm text-orange-700">Event: <span id="signupEventCode" class="font-semibold"></span></p>
                 </div>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                        <input type="text" id="userNameInput" placeholder="Enter your name" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <input type="text" id="regNameInput" placeholder="Enter your name" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Mobile Number (10 digits)</label>
-                        <input type="tel" id="userMobileInput" placeholder="9876543210" maxlength="10" pattern="[0-9]{10}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <input type="tel" id="regMobileInput" placeholder="9876543210" maxlength="10" pattern="[0-9]{10}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">PIN (4+ digits)</label>
-                        <input type="password" id="userPinInput" placeholder="••••" maxlength="6" minlength="4" pattern="[0-9]{4,6}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">PIN (4–6 digits)</label>
+                        <input type="password" id="regPinInput" placeholder="••••" maxlength="6" minlength="4" pattern="[0-9]{4,6}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500">
                     </div>
-                    <button onclick="authenticateUser()" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Login / Register</button>
-                    <button onclick="backToEventCode()" class="w-full text-slate-600 py-2 text-sm hover:text-slate-800">← Change Event Code</button>
+                    <button onclick="completeRegistration()" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Sign up & Login</button>
+                    <button onclick="backToAuthChoice()" class="w-full text-slate-600 py-2 text-sm hover:text-slate-800">← Back</button>
+                </div>
+            </div>
+
+            <!-- Login: Mobile + PIN -->
+            <div id="loginSection" class="hidden">
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                    <p class="text-sm text-orange-700">Event: <span id="loginEventCode" class="font-semibold"></span></p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Mobile Number (10 digits)</label>
+                        <input type="tel" id="loginMobileInput" placeholder="9876543210" maxlength="10" pattern="[0-9]{10}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">PIN</label>
+                        <input type="password" id="loginPinInput" placeholder="••••" maxlength="6" minlength="4" pattern="[0-9]{4,6}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <button onclick="performLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">Login</button>
+                    <button onclick="backToAuthChoice()" class="w-full text-slate-600 py-2 text-sm hover:text-slate-800">← Back</button>
                 </div>
             </div>
         </div>
@@ -69,7 +101,7 @@
                             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU8tk_qf_l-_l-vL5u5z9klUXMj6-4ZY-xT-tmqFtakUhcQN_CgI6phSU&s" alt="Ganesh" class="w-full h-full object-contain">
                         </div>
                         <div>
-                            <h1 class="text-lg font-bold text-slate-800">Ganesh Utsav Finance Manager - Maddiralapadu</h1>
+                            <h1 class="text-lg font-bold text-slate-800">Festival Finance</h1>
                             <p class="text-xs text-slate-500" id="headerEventCode">GANESH2026</p>
                         </div>
                     </div>
@@ -346,24 +378,44 @@
             currentEventCode = code;
             document.getElementById('headerEventCode').textContent = code;
 
-            // Unified login for both codes: Name + Mobile + PIN
+            // Show choice: Login or Sign up
             document.getElementById('eventCodeSection').classList.add('hidden');
-            document.getElementById('userLoginSection').classList.remove('hidden');
-            document.getElementById('displayEventCode').textContent = code;
+            document.getElementById('authChoiceSection').classList.remove('hidden');
+            document.getElementById('choiceEventCode').textContent = code;
         }
 
         function backToEventCode() {
             document.getElementById('eventCodeSection').classList.remove('hidden');
-            document.getElementById('userLoginSection').classList.add('hidden');
+            document.getElementById('authChoiceSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('eventCodeInput').value = '';
             currentEventCode = null;
         }
 
-        // Unified Login (Name + Mobile + PIN) for both GANESH2026 and ADMIN2026
-        async function authenticateUser() {
-            const name = document.getElementById('userNameInput').value.trim();
-            const mobile = document.getElementById('userMobileInput').value.trim();
-            const pin = document.getElementById('userPinInput').value.trim();
+        function backToAuthChoice() {
+            document.getElementById('authChoiceSection').classList.remove('hidden');
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.add('hidden');
+        }
+
+        function showSignup() {
+            document.getElementById('authChoiceSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.remove('hidden');
+            document.getElementById('signupEventCode').textContent = currentEventCode;
+        }
+
+        function showLogin() {
+            document.getElementById('authChoiceSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginEventCode').textContent = currentEventCode;
+        }
+
+        // Sign up: Name + Mobile + PIN
+        async function completeRegistration() {
+            const name = document.getElementById('regNameInput').value.trim();
+            const mobile = document.getElementById('regMobileInput').value.trim();
+            const pin = document.getElementById('regPinInput').value.trim();
 
             if (!name || !mobile || !pin) {
                 showToast('Fill all fields', 'error');
@@ -373,22 +425,64 @@
                 showToast('Enter 10-digit mobile', 'error');
                 return;
             }
+            if (!/^\d{4,6}$/.test(pin)) {
+                showToast('PIN must be 4–6 digits', 'error');
+                return;
+            }
 
             try {
-                const { data: existing, error } = await db.from('users').select('*').eq('mobile', mobile).eq('event_code', currentEventCode).single();
-                
-                let user;
-                if (existing) {
-                    if (existing.pin !== pin) {
-                        showToast('Wrong PIN', 'error');
-                        return;
-                    }
-                    user = existing;
-                } else {
-                    const isAdmin = currentEventCode === ADMIN_EVENT_CODE;
-                    const { data: newUser, error: insErr } = await db.from('users').insert([{ name, mobile, pin, event_code: currentEventCode, is_super_user: isAdmin }]).select().single();
-                    if (insErr) throw insErr;
-                    user = newUser;
+                const isAdmin = currentEventCode === ADMIN_EVENT_CODE;
+                const { data: user, error } = await db
+                    .from('users')
+                    .insert([{ name, mobile, pin, event_code: currentEventCode, is_super_user: isAdmin }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                currentUser = user;
+                localStorage.setItem('festivalSession', JSON.stringify({ user: currentUser, eventCode: currentEventCode }));
+
+                // Record login event
+                await db.from('user_logins').insert([{ user_id: user.id }]);
+
+                showApp();
+            } catch (err) {
+                console.error(err);
+                showToast('Sign up failed: ' + err.message, 'error');
+            }
+        }
+
+        // Login: Mobile + PIN
+        async function performLogin() {
+            const mobile = document.getElementById('loginMobileInput').value.trim();
+            const pin = document.getElementById('loginPinInput').value.trim();
+
+            if (!mobile || !pin) {
+                showToast('Enter mobile and PIN', 'error');
+                return;
+            }
+            if (!/^\d{10}$/.test(mobile)) {
+                showToast('Enter 10-digit mobile', 'error');
+                return;
+            }
+
+            try {
+                const { data: user, error } = await db
+                    .from('users')
+                    .select('*')
+                    .eq('mobile', mobile)
+                    .eq('event_code', currentEventCode)
+                    .single();
+
+                if (error || !user) {
+                    showToast('User not found for this event code', 'error');
+                    return;
+                }
+
+                if (user.pin !== pin) {
+                    showToast('Wrong PIN', 'error');
+                    return;
                 }
 
                 currentUser = user;
@@ -414,7 +508,7 @@
 
             if (isAdmin) {
                 document.getElementById('adminBadge').classList.remove('hidden');
-                document.getElementById('usersTabBtn').classList.remove('hidden'); // Show Users tab for admins
+                document.getElementById('usersTabBtn').classList.remove('hidden');
             }
 
             loadAllData();
@@ -454,7 +548,6 @@
                 loadCategories()
             ];
 
-            // Only load Users tab if the tab is currently visible
             const usersTabVisible = document.getElementById('usersTab') &&
                                     !document.getElementById('usersTab').classList.contains('hidden');
 
@@ -506,6 +599,7 @@
         }
 
         async function loadCategories() {
+            // Load ALL categories (shared across event codes)
             const { data, error } = await db.from('categories').select('*').order('name');
             if (error) {
                 console.error('Error loading categories:', error);
@@ -532,10 +626,12 @@
             otherOpt.textContent = 'Other (type category)';
             select.appendChild(otherOpt);
 
+            // Fix: keep "Other" selection stable when typing
             select.onchange = () => {
                 if (select.value === '__OTHER__') {
                     otherInput.classList.remove('hidden');
                     otherInput.required = true;
+                    otherInput.focus();
                 } else {
                     otherInput.classList.add('hidden');
                     otherInput.required = false;
@@ -563,7 +659,6 @@
                 </div>
             `;
 
-            // Load all users
             const { data: users, error: usersError } = await db
                 .from('users')
                 .select('id, name, mobile, event_code, is_super_user, created_at')
@@ -589,7 +684,6 @@
                 return;
             }
 
-            // Load all login events
             const { data: logins, error: loginsError } = await db
                 .from('user_logins')
                 .select('id, user_id, logged_in_at')
@@ -649,7 +743,6 @@
                 return;
             }
 
-            // Delete user (cascade will remove their user_logins)
             const { error } = await db
                 .from('users')
                 .delete()
@@ -792,31 +885,66 @@
                 return;
             }
 
-            let html = donations.map(d => `<div class="p-4 hover:bg-slate-50 relative">
-                ${currentUser.is_super_user ? `<button onclick="openDelete('donation', '${d.id}', '${d.donor_name}', ${d.amount})" class="absolute top-4 right-4 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Delete"><i class="ph ph-trash text-lg"></i></button>` : ''}
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="font-semibold">${d.donor_name}</h4>
-                        <p class="text-sm text-slate-500">By: ${d.collector_name}</p>
+            let html = donations.map(d => {
+                const isPaid = d.payment_status === 'Paid';
+                return `<div class="p-4 hover:bg-slate-50 relative">
+                    ${currentUser.is_super_user ? `<button onclick="openDelete('donation', '${d.id}', '${d.donor_name}', ${d.amount})" class="absolute top-4 right-4 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Delete"><i class="ph ph-trash text-lg"></i></button>` : ''}
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="font-semibold">${d.donor_name}</h4>
+                            <p class="text-sm text-slate-500">By: ${d.collector_name}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">₹${d.amount.toLocaleString('en-IN')}</p>
+                            <span class="text-xs px-2 py-1 ${isPaid ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} rounded">
+                                ${isPaid ? 'Paid' : 'Unpaid'}
+                            </span>
+                            ${currentUser.is_super_user ? `
+                                <button onclick="toggleDonationStatus('${d.id}', '${isPaid ? 'Unpaid' : 'Paid'}')"
+                                    class="ml-2 text-xs px-2 py-1 rounded ${
+                                        isPaid
+                                            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    }">
+                                    Mark ${isPaid ? 'Unpaid' : 'Paid'}
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-lg font-bold ${d.payment_status === 'Paid' ? 'text-green-600' : 'text-amber-600'}">₹${d.amount.toLocaleString('en-IN')}</p>
-                        <span class="text-xs px-2 py-1 ${d.payment_status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} rounded">${d.payment_status}</span>
-                    </div>
-                </div>
-            </div>`).join('');
+                </div>`;
+            }).join('');
             container.innerHTML = html;
         }
 
+        async function toggleDonationStatus(donationId, newStatus) {
+            if (!currentUser || !currentUser.is_super_user) {
+                showToast('Only admins can change donation status', 'error');
+                return;
+            }
+
+            const { error } = await db
+                .from('donations')
+                .update({ payment_status: newStatus })
+                .eq('id', donationId);
+
+            if (error) {
+                console.error('Update status error:', error);
+                showToast('Update failed: ' + error.message, 'error');
+                return;
+            }
+
+            showToast('Donation status updated');
+            await loadAllData();
+        }
+
         async function updateDashboard(isAdmin) {
+            // Dashboard: count only Paid donations for everyone
+            let donationsQuery = db.from('donations').select('*').eq('payment_status', 'Paid');
             let expensesQuery = db.from('expenses').select('*');
-            let donationsQuery = db.from('donations').select('*');
 
             if (!isAdmin) {
+                donationsQuery = donationsQuery.eq('event_code', currentEventCode);
                 expensesQuery = expensesQuery.eq('event_code', currentEventCode);
-                donationsQuery = donationsQuery
-                    .eq('event_code', currentEventCode)
-                    .eq('payment_status', 'Paid');
             }
 
             const [{ data: expenses }, { data: donations }] = await Promise.all([
@@ -1008,7 +1136,6 @@
             active.classList.add('active', 'border-orange-500', 'text-orange-600');
             active.classList.remove('border-transparent', 'text-slate-600');
 
-            // If switching to Users tab, load it
             if (tab === 'users' && currentUser?.is_super_user) {
                 loadUsersTab();
             }
@@ -1061,7 +1188,7 @@
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
             const totalExp = (expenses || []).reduce((s, e) => s + e.amount, 0);
             
-            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\nGanesh Utsav Finance Manager - Maddiralapadu`;
+            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\n_Generated via Festival Finance_`;
             
             await navigator.clipboard.writeText(msg);
             showToast('Copied to clipboard!');
