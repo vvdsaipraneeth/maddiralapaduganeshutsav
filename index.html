@@ -35,7 +35,7 @@
                 <p class="text-xs text-slate-500 mt-3 text-center">Om Ganeshaya Namaha</p>
             </div>
 
-            <!-- After code: choose Login or Sign up -->
+            <!-- Auth Choice -->
             <div id="authChoiceSection" class="hidden">
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                     <p class="text-sm text-orange-700">Event: <span id="choiceEventCode" class="font-semibold"></span></p>
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <!-- Sign up: Name + Mobile + PIN -->
+            <!-- Sign up -->
             <div id="signupSection" class="hidden">
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                     <p class="text-sm text-orange-700">Event: <span id="signupEventCode" class="font-semibold"></span></p>
@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <!-- Login: Mobile + PIN -->
+            <!-- Login -->
             <div id="loginSection" class="hidden">
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                     <p class="text-sm text-orange-700">Event: <span id="loginEventCode" class="font-semibold"></span></p>
@@ -130,6 +130,7 @@
                     <button onclick="switchTab('dashboard')" class="tab-btn active px-4 py-3 text-sm font-medium border-b-2 border-orange-500 text-orange-600 whitespace-nowrap" data-tab="dashboard"><i class="ph ph-squares-four mr-2"></i>Dashboard</button>
                     <button onclick="switchTab('expenses')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="expenses"><i class="ph ph-receipt mr-2"></i>Expenses</button>
                     <button onclick="switchTab('donations')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="donations"><i class="ph ph-hand-coins mr-2"></i>Donations</button>
+                    <button onclick="switchTab('prasadam')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="prasadam"><i class="ph ph-bowl-food mr-2"></i>Prasadam Menu</button>
                     <button onclick="switchTab('categories')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="categories"><i class="ph ph-tag mr-2"></i>Categories</button>
                     <button onclick="switchTab('users')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap hidden" id="usersTabBtn" data-tab="users"><i class="ph ph-users mr-2"></i>Users</button>
                     <button onclick="switchTab('reports')" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap" data-tab="reports"><i class="ph ph-chart-pie-slice mr-2"></i>Reports</button>
@@ -155,6 +156,22 @@
                     <div class="bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl p-6 text-white shadow-lg">
                         <p class="text-orange-100 text-sm font-medium">Cash in Hand</p>
                         <h3 class="text-3xl font-bold mt-1" id="kpiCashInHand">₹0</h3>
+                    </div>
+                </div>
+
+                <!-- Live Prasadam Menu Widget -->
+                <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg mt-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-amber-100 text-sm font-medium flex items-center">
+                                <i class="ph ph-bowl-food text-xl mr-2"></i> Current Prasadam Menu
+                            </p>
+                            <h3 class="text-xl font-bold mt-1" id="kpiPrasadamTimeSlot">Loading Prasadam...</h3>
+                        </div>
+                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-md" id="kpiPrasadamDateTag">Today</span>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-amber-400/40">
+                        <p class="text-lg font-semibold tracking-wide whitespace-pre-line" id="kpiPrasadamItems">--</p>
                     </div>
                 </div>
             </div>
@@ -208,6 +225,24 @@
             </div>
 
             <div id="donationsTab" class="tab-content hidden fade-in">
+                <!-- Special Item Sponsorships Header & Button -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="text-md font-bold text-slate-800 flex items-center">
+                                <i class="ph ph-star text-amber-500 text-xl mr-2"></i> Special Item Sponsorships
+                            </h3>
+                            <p class="text-xs text-slate-500">Track special sponsorships (e.g., Ganesh Vigraham, Laddu Prasadam)</p>
+                        </div>
+                        <button onclick="openSpecialWidgetModal()" class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl text-xs font-semibold shadow hover:opacity-90 flex items-center gap-1">
+                            <i class="ph ph-plus text-base"></i> Add Special Widget
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="specialDonationsWidgets">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-1">
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-24">
@@ -232,12 +267,17 @@
                                     <label class="block text-sm font-medium text-slate-700 mb-2">Payment Status</label>
                                     <select id="paymentStatus" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500">
                                         <option value="Paid">✅ Paid</option>
+                                        <option value="Partially Paid">🌗 Partially Paid</option>
                                         <option value="Unpaid">⏳ Unpaid</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-2">Collector Name</label>
                                     <input type="text" id="collectorName" placeholder="Who collected?" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Notes</label>
+                                    <textarea id="donationNotes" placeholder="Special notes..." rows="2" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 resize-none"></textarea>
                                 </div>
                                 <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-xl font-semibold">Record Donation</button>
                             </form>
@@ -254,6 +294,46 @@
                 </div>
             </div>
 
+            <!-- Prasadam Menu Tab -->
+            <div id="prasadamTab" class="tab-content hidden fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 hidden" id="prasadamAdminFormCol">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-24">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-slate-800" id="prasadamFormTitle"><i class="ph ph-bowl-food mr-2 text-amber-600"></i>Update Prasadam Menu</h3>
+                                <button id="prasadamCancelEditBtn" onclick="resetPrasadamForm()" class="text-xs text-red-600 hover:underline hidden">Cancel Edit</button>
+                            </div>
+                            <form id="prasadamForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Date</label>
+                                    <input type="date" id="prasadamDate" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Session</label>
+                                    <select id="prasadamSession" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500" required>
+                                        <option value="Morning">🌅 Morning (12:00 AM - 12:00 PM)</option>
+                                        <option value="Evening">🌙 Evening (12:01 PM - 11:59 PM)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Menu Items (One per line)</label>
+                                    <textarea id="prasadamMenuText" placeholder="Laddu&#10;Pulihora&#10;Chakarapongali" rows="4" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 resize-none" required></textarea>
+                                </div>
+                                <button type="submit" id="prasadamSubmitBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-xl font-semibold">Save Menu</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2" id="prasadamListCol">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200">
+                            <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-slate-800"><i class="ph ph-calendar-blank mr-2 text-amber-600"></i>Prasadam Schedule (From 14/09/2026)</h3>
+                            </div>
+                            <div id="prasadamScheduleList" class="divide-y divide-slate-100 max-h-[600px] overflow-y-auto p-4 space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="categoriesTab" class="tab-content hidden fade-in">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                     <h3 class="text-lg font-semibold text-slate-800 mb-4">Manage Categories</h3>
@@ -265,14 +345,12 @@
                 </div>
             </div>
 
-            <!-- Users Tab (Admin only) -->
+            <!-- Users Tab -->
             <div id="usersTab" class="tab-content hidden fade-in">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-slate-800">All Users</h3>
-                        <button onclick="loadUsersTab()" class="text-xs px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded">
-                            Refresh
-                        </button>
+                        <button onclick="loadUsersTab()" class="text-xs px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded">Refresh</button>
                     </div>
                     <div id="usersList" class="space-y-2"></div>
                 </div>
@@ -296,6 +374,49 @@
         </main>
     </div>
 
+    <!-- Special Sponsorship Widget Modal -->
+    <div id="specialWidgetModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-14 h-14 bg-amber-100 text-amber-600 rounded-full mb-2">
+                    <i class="ph ph-star text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800" id="specialWidgetModalTitle">Add Special Sponsorship</h3>
+            </div>
+            <form id="specialWidgetForm" class="space-y-4">
+                <input type="hidden" id="specialWidgetId">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Widget Name / Special Item</label>
+                    <input type="text" id="widgetNameInput" placeholder="e.g., Ganesh Vigraham, Laddu Prasadam" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Sponsor Name</label>
+                    <input type="text" id="widgetSponsorNameInput" placeholder="Name of person or family" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Amount (₹)</label>
+                    <input type="number" id="widgetAmountInput" placeholder="0" min="0" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Payment Status</label>
+                    <select id="widgetPaymentStatusInput" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                        <option value="Paid">✅ Paid</option>
+                        <option value="Partially Paid">🌗 Partially Paid</option>
+                        <option value="Unpaid">⏳ Unpaid</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                    <textarea id="widgetNotesInput" placeholder="Small notes..." rows="2" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeSpecialWidgetModal()" class="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:opacity-90">Save Widget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Delete Modal -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
@@ -306,9 +427,6 @@
                 <h3 class="text-xl font-bold text-slate-800">Delete Record?</h3>
                 <p id="deleteModalMessage" class="text-slate-600 mt-2"></p>
             </div>
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p class="text-sm text-red-700"><i class="ph ph-info mr-2"></i>This action cannot be undone</p>
-            </div>
             <div class="flex space-x-3">
                 <button onclick="closeDeleteModal()" class="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">Cancel</button>
                 <button onclick="confirmDelete()" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"><i class="ph ph-trash mr-2"></i>Delete</button>
@@ -316,20 +434,32 @@
         </div>
     </div>
 
-    <!-- Edit Donation Amount Modal (for Unpaid only) -->
+    <!-- Edit Donation Modal -->
     <div id="editDonationModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in">
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                     <i class="ph ph-pencil-simple text-3xl text-blue-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800">Edit Donation Amount</h3>
+                <h3 class="text-xl font-bold text-slate-800">Edit Donation Details</h3>
                 <p id="editDonationModalMessage" class="text-slate-600 mt-2"></p>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">New Amount (₹)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Amount (₹)</label>
                     <input type="number" id="editDonationAmountInput" placeholder="0" min="1" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                    <select id="editDonationStatusInput" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <option value="Paid">✅ Paid</option>
+                        <option value="Partially Paid">🌗 Partially Paid</option>
+                        <option value="Unpaid">⏳ Unpaid</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Notes</label>
+                    <textarea id="editDonationNotesInput" rows="2" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                 </div>
                 <div class="flex space-x-3">
                     <button onclick="closeEditDonationModal()" class="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">Cancel</button>
@@ -360,6 +490,8 @@
         let editDonationTarget = null;
         let pollingInterval = null;
         let subscriptions = [];
+        let prasadamDataStore = [];
+        let specialWidgetsStore = [];
 
         const defaultCategories = ['Ganesh Vigraham','Miscellaneous'];
 
@@ -392,17 +524,13 @@
 
         async function verifyEventCode() {
             const code = document.getElementById('eventCodeInput').value.trim().toUpperCase();
-            if (!code) {
-                showToast('Enter event code', 'error');
-                return;
-            }
+            if (!code) { showToast('Enter event code', 'error'); return; }
             if (code !== MEMBER_EVENT_CODE && code !== ADMIN_EVENT_CODE) {
                 showToast('Invalid code. Use GANESH2026', 'error');
                 return;
             }
             currentEventCode = code;
             document.getElementById('headerEventCode').textContent = code;
-
             document.getElementById('eventCodeSection').classList.add('hidden');
             document.getElementById('authChoiceSection').classList.remove('hidden');
             document.getElementById('choiceEventCode').textContent = code;
@@ -440,18 +568,9 @@
             const mobile = document.getElementById('regMobileInput').value.trim();
             const pin = document.getElementById('regPinInput').value.trim();
 
-            if (!name || !mobile || !pin) {
-                showToast('Fill all fields', 'error');
-                return;
-            }
-            if (!/^\d{10}$/.test(mobile)) {
-                showToast('Enter 10-digit mobile', 'error');
-                return;
-            }
-            if (!/^\d{4,6}$/.test(pin)) {
-                showToast('PIN must be 4–6 digits', 'error');
-                return;
-            }
+            if (!name || !mobile || !pin) { showToast('Fill all fields', 'error'); return; }
+            if (!/^\d{10}$/.test(mobile)) { showToast('Enter 10-digit mobile', 'error'); return; }
+            if (!/^\d{4,6}$/.test(pin)) { showToast('PIN must be 4–6 digits', 'error'); return; }
 
             try {
                 const isAdmin = currentEventCode === ADMIN_EVENT_CODE;
@@ -466,10 +585,8 @@
                 currentUser = user;
                 localStorage.setItem('festivalSession', JSON.stringify({ user: currentUser, eventCode: currentEventCode }));
                 await db.from('user_logins').insert([{ user_id: user.id }]);
-
                 showApp();
             } catch (err) {
-                console.error(err);
                 showToast('Sign up failed: ' + err.message, 'error');
             }
         }
@@ -478,14 +595,8 @@
             const mobile = document.getElementById('loginMobileInput').value.trim();
             const pin = document.getElementById('loginPinInput').value.trim();
 
-            if (!mobile || !pin) {
-                showToast('Enter mobile and PIN', 'error');
-                return;
-            }
-            if (!/^\d{10}$/.test(mobile)) {
-                showToast('Enter 10-digit mobile', 'error');
-                return;
-            }
+            if (!mobile || !pin) { showToast('Enter mobile and PIN', 'error'); return; }
+            if (!/^\d{10}$/.test(mobile)) { showToast('Enter 10-digit mobile', 'error'); return; }
 
             try {
                 const { data: user, error } = await db
@@ -495,23 +606,14 @@
                     .eq('event_code', currentEventCode)
                     .single();
 
-                if (error || !user) {
-                    showToast('User not found for this event code', 'error');
-                    return;
-                }
-
-                if (user.pin !== pin) {
-                    showToast('Wrong PIN', 'error');
-                    return;
-                }
+                if (error || !user) { showToast('User not found for this code', 'error'); return; }
+                if (user.pin !== pin) { showToast('Wrong PIN', 'error'); return; }
 
                 currentUser = user;
                 localStorage.setItem('festivalSession', JSON.stringify({ user: currentUser, eventCode: currentEventCode }));
                 await db.from('user_logins').insert([{ user_id: user.id }]);
-
                 showApp();
             } catch (err) {
-                console.error(err);
                 showToast('Login failed: ' + err.message, 'error');
             }
         }
@@ -523,11 +625,17 @@
             document.getElementById('headerUserRole').textContent = currentUser.is_super_user ? 'Admin' : 'Member';
 
             const isAdmin = !!currentUser.is_super_user;
-
             if (isAdmin) {
                 document.getElementById('adminBadge').classList.remove('hidden');
                 document.getElementById('usersTabBtn').classList.remove('hidden');
+                document.getElementById('prasadamAdminFormCol').classList.remove('hidden');
+                document.getElementById('prasadamListCol').className = 'lg:col-span-2';
+            } else {
+                document.getElementById('prasadamAdminFormCol').classList.add('hidden');
+                document.getElementById('prasadamListCol').className = 'lg:col-span-3';
             }
+
+            document.getElementById('prasadamDate').value = '2026-09-14';
 
             loadAllData();
             setupRealtime();
@@ -536,12 +644,13 @@
 
         function setupRealtime() {
             if (!db) return;
-            
-            const sub1 = db.channel('exp').on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `event_code=eq.${currentEventCode}` }, () => { console.log('Expense changed'); loadAllData(); }).subscribe();
-            const sub2 = db.channel('don').on('postgres_changes', { event: '*', schema: 'public', table: 'donations', filter: `event_code=eq.${currentEventCode}` }, () => { console.log('Donation changed'); loadAllData(); }).subscribe();
-            const sub3 = db.channel('cat').on('postgres_changes', { event: '*', schema: 'public', table: 'categories', filter: `event_code=eq.${currentEventCode}` }, () => { console.log('Category changed'); loadAllData(); }).subscribe();
-            
-            subscriptions = [sub1, sub2, sub3];
+            const sub1 = db.channel('exp').on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => { loadAllData(); }).subscribe();
+            const sub2 = db.channel('don').on('postgres_changes', { event: '*', schema: 'public', table: 'donations' }, () => { loadAllData(); }).subscribe();
+            const sub3 = db.channel('cat').on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => { loadAllData(); }).subscribe();
+            const sub4 = db.channel('pra').on('postgres_changes', { event: '*', schema: 'public', table: 'prasadam_menu' }, () => { loadAllData(); }).subscribe();
+            const sub5 = db.channel('spw').on('postgres_changes', { event: '*', schema: 'public', table: 'special_sponsorships' }, () => { loadAllData(); }).subscribe();
+
+            subscriptions = [sub1, sub2, sub3, sub4, sub5];
         }
 
         function cleanup() {
@@ -556,320 +665,381 @@
         }
 
         async function loadAllData() {
-            console.log('Loading all data...');
-
             const isAdmin = !!currentUser?.is_super_user;
-
-            const tasks = [
+            await Promise.all([
                 loadExpenses(isAdmin),
                 loadDonations(isAdmin),
-                loadCategories()
-            ];
-
-            const usersTabVisible = document.getElementById('usersTab') &&
-                                    !document.getElementById('usersTab').classList.contains('hidden');
-
-            if (isAdmin && usersTabVisible) {
-                tasks.push(loadUsersTab());
-            }
-
-            await Promise.all(tasks);
+                loadSpecialWidgets(),
+                loadCategories(),
+                loadPrasadamMenu()
+            ]);
             updateDashboard(isAdmin);
+            updatePrasadamWidget();
         }
 
         async function loadExpenses(isAdmin) {
-            console.log('Loading expenses...');
-
             let query = db.from('expenses').select('*').order('created_at', { ascending: false });
-
-            if (!isAdmin) {
-                query = query.eq('event_code', currentEventCode);
-            }
-
-            const { data, error } = await query;
-
-            if (error) {
-                console.error('Error loading expenses:', error);
-                return;
-            }
-
-            console.log('Expenses loaded:', data?.length);
+            if (!isAdmin) query = query.eq('event_code', currentEventCode);
+            const { data } = await query;
             renderExpenses(data || []);
         }
 
         async function loadDonations(isAdmin) {
             let query = db.from('donations').select('*').order('created_at', { ascending: false });
-
-            if (!isAdmin) {
-                query = query
-                    .eq('event_code', currentEventCode)
-                    .eq('payment_status', 'Paid');
-            }
-
-            const { data, error } = await query;
-
-            if (error) {
-                console.error('Error loading donations:', error);
-                return;
-            }
-
+            if (!isAdmin) query = query.eq('event_code', currentEventCode);
+            const { data } = await query;
             renderDonations(data || []);
         }
 
-        async function loadCategories() {
-            const { data, error } = await db.from('categories').select('*').order('name');
+        // ----- Special Sponsorship Widgets -----
+
+        async function loadSpecialWidgets() {
+            const { data, error } = await db
+                .from('special_sponsorships')
+                .select('*')
+                .order('created_at', { ascending: true });
+
             if (error) {
-                console.error('Error loading categories:', error);
+                console.error('Error loading special widgets:', error);
                 return;
             }
 
+            specialWidgetsStore = data || [];
+            renderSpecialWidgets(specialWidgetsStore);
+        }
+
+        function renderSpecialWidgets(widgets) {
+            const container = document.getElementById('specialDonationsWidgets');
+            if (!widgets || widgets.length === 0) {
+                container.innerHTML = `<div class="col-span-2 p-6 border border-dashed border-slate-300 rounded-2xl text-center text-slate-400 text-sm">
+                    No special sponsorship widgets added yet. Click "Add Special Widget" to create one.
+                </div>`;
+                return;
+            }
+
+            const isAdmin = currentUser?.is_super_user;
+
+            container.innerHTML = widgets.map(w => {
+                const statusBg = w.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
+                                 w.payment_status === 'Partially Paid' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800';
+
+                return `
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow">
+                                <i class="ph ph-star text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">${escapeHtml(w.widget_name)}</h4>
+                                <p class="text-xs text-slate-500">${w.sponsor_name ? 'Sponsor: ' + escapeHtml(w.sponsor_name) : 'No sponsor recorded'}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusBg}">${w.payment_status || 'Unpaid'}</span>
+                            ${isAdmin ? `
+                                <button onclick="openSpecialWidgetModal('${w.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Widget"><i class="ph ph-pencil-simple text-base"></i></button>
+                                <button onclick="deleteSpecialWidget('${w.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Widget"><i class="ph ph-trash text-base"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-sm">
+                        <div>
+                            <span class="text-xs text-slate-400">Amount:</span>
+                            <span class="font-bold text-slate-800 ml-1">₹${(w.amount || 0).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400">Notes:</span>
+                            <span class="text-xs font-medium text-slate-600 ml-1">${w.notes ? escapeHtml(w.notes) : 'None'}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openSpecialWidgetModal(id = null) {
+            const form = document.getElementById('specialWidgetForm');
+            form.reset();
+
+            if (id) {
+                const w = specialWidgetsStore.find(item => item.id === id);
+                if (w) {
+                    document.getElementById('specialWidgetId').value = w.id;
+                    document.getElementById('widgetNameInput').value = w.widget_name;
+                    document.getElementById('widgetSponsorNameInput').value = w.sponsor_name || '';
+                    document.getElementById('widgetAmountInput').value = w.amount || 0;
+                    document.getElementById('widgetPaymentStatusInput').value = w.payment_status || 'Unpaid';
+                    document.getElementById('widgetNotesInput').value = w.notes || '';
+                    document.getElementById('specialWidgetModalTitle').textContent = 'Edit Special Sponsorship';
+                }
+            } else {
+                document.getElementById('specialWidgetId').value = '';
+                document.getElementById('specialWidgetModalTitle').textContent = 'Add Special Sponsorship';
+            }
+
+            document.getElementById('specialWidgetModal').classList.remove('hidden');
+        }
+
+        function closeSpecialWidgetModal() {
+            document.getElementById('specialWidgetModal').classList.add('hidden');
+        }
+
+        document.getElementById('specialWidgetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('specialWidgetId').value;
+            const widget_name = document.getElementById('widgetNameInput').value.trim();
+            const sponsor_name = document.getElementById('widgetSponsorNameInput').value.trim();
+            const amount = parseFloat(document.getElementById('widgetAmountInput').value) || 0;
+            const payment_status = document.getElementById('widgetPaymentStatusInput').value;
+            const notes = document.getElementById('widgetNotesInput').value.trim();
+
+            const payload = {
+                event_code: currentEventCode,
+                widget_name,
+                sponsor_name,
+                amount,
+                payment_status,
+                notes
+            };
+
+            try {
+                if (id) {
+                    const { error } = await db.from('special_sponsorships').update(payload).eq('id', id);
+                    if (error) throw error;
+                    showToast('Widget updated!');
+                } else {
+                    const { error } = await db.from('special_sponsorships').insert([payload]);
+                    if (error) throw error;
+                    showToast('Widget added!');
+                }
+                closeSpecialWidgetModal();
+                loadSpecialWidgets();
+            } catch (err) {
+                showToast('Operation failed: ' + err.message, 'error');
+            }
+        });
+
+        async function deleteSpecialWidget(id) {
+            if (!currentUser?.is_super_user) return;
+            if (!confirm('Are you sure you want to delete this special sponsorship widget?')) return;
+
+            try {
+                const { error } = await db.from('special_sponsorships').delete().eq('id', id);
+                if (error) throw error;
+                showToast('Widget deleted!');
+                loadSpecialWidgets();
+            } catch (err) {
+                showToast('Failed to delete widget: ' + err.message, 'error');
+            }
+        }
+
+        // ----- Prasadam Menu Functions (With Fixed Edit) -----
+
+        async function loadPrasadamMenu() {
+            const { data, error } = await db
+                .from('prasadam_menu')
+                .select('*')
+                .gte('date', '2026-09-14')
+                .order('date', { ascending: true })
+                .order('session', { ascending: true });
+
+            if (error) {
+                console.error('Error loading prasadam menu:', error);
+                return;
+            }
+
+            prasadamDataStore = data || [];
+            renderPrasadamMenu(prasadamDataStore);
+            updatePrasadamWidget();
+        }
+
+        function renderPrasadamMenu(menus) {
+            const container = document.getElementById('prasadamScheduleList');
+            if (!menus || menus.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400"><i class="ph ph-bowl-food text-4xl mb-3"></i><p>No prasadam menu scheduled yet starting 14/09/2026.</p></div>';
+                return;
+            }
+
+            const groupedByDate = {};
+            menus.forEach(m => {
+                if (!groupedByDate[m.date]) groupedByDate[m.date] = {};
+                groupedByDate[m.date][m.session] = m;
+            });
+
+            let html = '';
+            Object.keys(groupedByDate).sort().forEach(dateStr => {
+                const parts = dateStr.split('-');
+                const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                const morningObj = groupedByDate[dateStr]['Morning'];
+                const eveningObj = groupedByDate[dateStr]['Evening'];
+
+                html += `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                        <span class="font-bold text-slate-800 text-base"><i class="ph ph-calendar-check mr-2 text-amber-600"></i>${formattedDate}</span>
+                        <span class="text-xs text-slate-500 font-mono">${dateStr}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-lg relative">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold text-amber-900 text-sm">🌅 Morning (12 AM - 12 PM)</span>
+                                ${currentUser?.is_super_user && morningObj ? `
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="editPrasadamById('${morningObj.id}')" class="text-amber-700 hover:text-amber-900 text-xs flex items-center bg-amber-200/60 px-2 py-0.5 rounded"><i class="ph ph-pencil mr-1"></i>Edit</button>
+                                    <button onclick="deletePrasadam('${morningObj.id}')" class="text-red-600 hover:text-red-800 text-xs"><i class="ph ph-trash text-base"></i></button>
+                                </div>` : ''}
+                            </div>
+                            <p class="text-slate-700 text-sm font-medium mt-1 whitespace-pre-line">${morningObj ? escapeHtml(morningObj.items) : '<span class="text-slate-400 italic">Not set</span>'}</p>
+                        </div>
+                        <div class="p-3 bg-purple-50/70 border border-purple-200 rounded-lg relative">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold text-purple-900 text-sm">🌙 Evening (12:01 PM - 11:59 PM)</span>
+                                ${currentUser?.is_super_user && eveningObj ? `
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="editPrasadamById('${eveningObj.id}')" class="text-purple-700 hover:text-purple-900 text-xs flex items-center bg-purple-200/60 px-2 py-0.5 rounded"><i class="ph ph-pencil mr-1"></i>Edit</button>
+                                    <button onclick="deletePrasadam('${eveningObj.id}')" class="text-red-600 hover:text-red-800 text-xs"><i class="ph ph-trash text-base"></i></button>
+                                </div>` : ''}
+                            </div>
+                            <p class="text-slate-700 text-sm font-medium mt-1 whitespace-pre-line">${eveningObj ? escapeHtml(eveningObj.items) : '<span class="text-slate-400 italic">Not set</span>'}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function editPrasadamById(id) {
+            const item = prasadamDataStore.find(m => m.id === id);
+            if (!item) return;
+
+            document.getElementById('prasadamDate').value = item.date;
+            document.getElementById('prasadamSession').value = item.session;
+            document.getElementById('prasadamMenuText').value = item.items;
+            
+            document.getElementById('prasadamFormTitle').innerHTML = '<i class="ph ph-pencil-simple mr-2 text-amber-600"></i>Edit Prasadam Menu';
+            document.getElementById('prasadamSubmitBtn').textContent = 'Update Menu';
+            document.getElementById('prasadamCancelEditBtn').classList.remove('hidden');
+
+            document.getElementById('prasadamTab').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetPrasadamForm() {
+            document.getElementById('prasadamForm').reset();
+            document.getElementById('prasadamDate').value = '2026-09-14';
+            document.getElementById('prasadamFormTitle').innerHTML = '<i class="ph ph-bowl-food mr-2 text-amber-600"></i>Update Prasadam Menu';
+            document.getElementById('prasadamSubmitBtn').textContent = 'Save Menu';
+            document.getElementById('prasadamCancelEditBtn').classList.add('hidden');
+        }
+
+        async function deletePrasadam(id) {
+            if (!currentUser?.is_super_user) return;
+            if (!confirm('Delete this prasadam menu entry?')) return;
+            try {
+                const { error } = await db.from('prasadam_menu').delete().eq('id', id);
+                if (error) throw error;
+                showToast('Prasadam menu item deleted');
+                loadPrasadamMenu();
+            } catch (err) {
+                showToast('Failed to delete: ' + err.message, 'error');
+            }
+        }
+
+        function updatePrasadamWidget() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            
+            const isMorning = now.getHours() < 12;
+            const currentSession = isMorning ? 'Morning' : 'Evening';
+            const sessionLabel = isMorning ? '🌅 Morning Menu (12 AM - 12 PM)' : '🌙 Evening Menu (12:01 PM - 11:59 PM)';
+
+            document.getElementById('kpiPrasadamTimeSlot').textContent = sessionLabel;
+            document.getElementById('kpiPrasadamDateTag').textContent = `${day}/${month}/${year}`;
+
+            const matchingMenu = prasadamDataStore.find(m => m.date === todayStr && m.session === currentSession);
+            document.getElementById('kpiPrasadamItems').textContent = (matchingMenu && matchingMenu.items) ? matchingMenu.items : 'No menu scheduled for this slot today.';
+        }
+
+        document.getElementById('prasadamForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser?.is_super_user) {
+                showToast('Only admins can update prasadam menu', 'error');
+                return;
+            }
+
+            const date = document.getElementById('prasadamDate').value;
+            const session = document.getElementById('prasadamSession').value;
+            const items = document.getElementById('prasadamMenuText').value.trim();
+
+            if (date < '2026-09-14') {
+                showToast('Start date must be from 14/09/2026', 'error');
+                return;
+            }
+
+            try {
+                const { error } = await db
+                    .from('prasadam_menu')
+                    .upsert([{
+                        event_code: currentEventCode,
+                        date: date,
+                        session: session,
+                        items: items
+                    }], { onConflict: 'event_code,date,session' });
+
+                if (error) throw error;
+
+                showToast('Prasadam menu saved!');
+                resetPrasadamForm();
+                loadPrasadamMenu();
+            } catch (err) {
+                showToast('Failed to save prasadam: ' + err.message, 'error');
+            }
+        });
+
+        // ----- Standard Category & Other Handlers -----
+
+        async function loadCategories() {
+            const { data } = await db.from('categories').select('*').order('name');
             const custom = (data || []).map(c => c.name);
             const all = [...defaultCategories, ...custom.filter(c => !defaultCategories.includes(c))];
 
             const select = document.getElementById('expenseItemSelect');
             const otherInput = document.getElementById('expenseItemOther');
 
-            // Clear existing options except the default placeholder
             select.innerHTML = '<option value="" disabled>Select category</option>';
-
             all.forEach(cat => {
                 const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat;
+                opt.value = cat; opt.textContent = cat;
                 select.appendChild(opt);
             });
 
             const otherOpt = document.createElement('option');
-            otherOpt.value = '__OTHER__';
-            otherOpt.textContent = 'Other (type category)';
+            otherOpt.value = '__OTHER__'; otherOpt.textContent = 'Other (type category)';
             select.appendChild(otherOpt);
-
-            // IMPORTANT: Do NOT set required on select; that causes browser to reset to first disabled option
-            let isOtherSelected = false;
 
             select.onchange = () => {
                 if (select.value === '__OTHER__') {
-                    isOtherSelected = true;
                     otherInput.classList.remove('hidden');
                     otherInput.required = true;
                     otherInput.focus();
                 } else {
-                    isOtherSelected = false;
                     otherInput.classList.add('hidden');
                     otherInput.required = false;
                     otherInput.value = '';
                 }
             };
 
-            // Keep "Other" selected while typing
-            otherInput.addEventListener('input', () => {
-                if (isOtherSelected) {
-                    select.value = '__OTHER__';
-                }
-            });
-
             const container = document.getElementById('categoriesList');
             container.innerHTML = defaultCategories.map(c => `<div class="p-3 bg-slate-50 rounded-lg"><span class="text-slate-700">${c}</span> <span class="text-xs text-slate-400">(Default)</span></div>`).join('') +
                 custom.map(c => `<div class="p-3 bg-green-50 rounded-lg flex justify-between items-center"><span class="text-slate-700">${c}</span> <button onclick="deleteCategory('${c}')" class="text-red-600 text-sm hover:underline">Delete</button></div>`).join('');
         }
 
-        // ----- Users Tab (Admin only) -----
-
-        async function loadUsersTab() {
-            const container = document.getElementById('usersList');
-
-            if (!currentUser || !currentUser.is_super_user) {
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="text-center py-8 text-slate-400">
-                    Loading users...
-                </div>
-            `;
-
-            const { data: users, error: usersError } = await db
-                .from('users')
-                .select('id, name, mobile, event_code, is_super_user, created_at')
-                .order('created_at', { ascending: true });
-
-            if (usersError) {
-                console.error('Error loading users tab:', usersError);
-                container.innerHTML = `
-                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                        Failed to load users: ${escapeHtml(usersError.message)}
-                    </div>
-                `;
-                return;
-            }
-
-            if (!users || users.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 text-slate-400">
-                        <i class="ph ph-users text-4xl mb-3"></i>
-                        <p>No users registered yet.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const { data: logins, error: loginsError } = await db
-                .from('user_logins')
-                .select('id, user_id, logged_in_at')
-                .in('user_id', users.map(u => u.id))
-                .order('logged_in_at', { ascending: false });
-
-            if (loginsError) {
-                console.error('Error loading logins:', loginsError);
-            }
-
-            const loginsByUser = {};
-            (logins || []).forEach(l => {
-                if (!loginsByUser[l.user_id]) loginsByUser[l.user_id] = [];
-                loginsByUser[l.user_id].push(l);
-            });
-
-            renderUsersTab(users, loginsByUser);
-        }
-
-        async function deleteLogin(loginId) {
-            if (!currentUser || !currentUser.is_super_user) {
-                showToast('Only admins can delete login records', 'error');
-                return;
-            }
-
-            if (!confirm('Delete this login record?')) {
-                return;
-            }
-
-            const { error } = await db
-                .from('user_logins')
-                .delete()
-                .eq('id', loginId);
-
-            if (error) {
-                console.error('Delete login error:', error);
-                showToast('Delete failed: ' + error.message, 'error');
-                return;
-            }
-
-            showToast('Login record deleted');
-            await loadUsersTab();
-        }
-
-        async function deleteUser(userId) {
-            if (!currentUser || !currentUser.is_super_user) {
-                showToast('Only admins can delete users', 'error');
-                return;
-            }
-
-            if (userId === currentUser.id) {
-                showToast('You cannot delete your own account', 'error');
-                return;
-            }
-
-            if (!confirm('Delete this user? This will also remove all their login records.')) {
-                return;
-            }
-
-            const { error } = await db
-                .from('users')
-                .delete()
-                .eq('id', userId);
-
-            if (error) {
-                console.error('Delete user error:', error);
-                showToast('Delete failed: ' + error.message, 'error');
-                return;
-            }
-
-            showToast('User deleted');
-            await loadUsersTab();
-        }
-
-        function renderUsersTab(users, loginsByUser) {
-            const container = document.getElementById('usersList');
-
-            container.innerHTML = users.map(user => {
-                const displayName = user.name || 'Unnamed user';
-                const displayContact = user.mobile || '-';
-                const userLogins = loginsByUser[user.id] || [];
-
-                return `
-                <div class="p-4 border border-slate-200 rounded-xl hover:bg-slate-50">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${
-                                user.is_super_user ? 'bg-orange-100' : 'bg-slate-100'
-                            }">
-                                <i class="ph ph-user ${
-                                    user.is_super_user ? 'text-orange-600' : 'text-slate-500'
-                                }"></i>
-                            </div>
-
-                            <div>
-                                <p class="font-semibold text-slate-800">
-                                    ${escapeHtml(displayName)}
-                                </p>
-                                <p class="text-sm text-slate-500">
-                                    ${escapeHtml(displayContact)} • 
-                                    <span class="font-mono text-xs">${escapeHtml(user.event_code || '')}</span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                                user.is_super_user
-                                    ? 'bg-orange-100 text-orange-700'
-                                    : 'bg-slate-100 text-slate-600'
-                            }">
-                                ${user.is_super_user ? 'Super User' : 'Member'}
-                            </span>
-
-                            ${user.id !== currentUser.id ? `
-                                <button
-                                    onclick="deleteUser('${user.id}')"
-                                    class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
-                                >
-                                    Delete user
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    ${userLogins.length > 0 ? `
-                        <div class="mt-3 space-y-1">
-                            <p class="text-xs font-medium text-slate-600">Login history:</p>
-                            <div class="max-h-40 overflow-y-auto space-y-1">
-                                ${userLogins.map(l => `
-                                    <div class="flex items-center justify-between text-sm bg-slate-50 rounded px-2 py-1">
-                                        <span class="text-slate-700">
-                                            Joined: ${new Date(l.logged_in_at).toLocaleString('en-IN')}
-                                        </span>
-                                        <button
-                                            onclick="deleteLogin('${l.id}')"
-                                            class="text-red-600 text-xs hover:underline"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : `
-                        <p class="mt-2 text-xs text-slate-400">No login records yet.</p>
-                    `}
-                </div>
-                `;
-            }).join('');
-        }
-
-        // ----- Renderers -----
-
         function renderExpenses(expenses) {
             const container = document.getElementById('expensesList');
-            
             if (!expenses.length) {
                 container.innerHTML = '<div class="text-center py-12 text-slate-400"><i class="ph ph-receipt text-4xl mb-3"></i><p>No expenses yet</p></div>';
                 return;
@@ -902,11 +1072,6 @@
             container.innerHTML = html;
         }
 
-        function toggleDetails(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle('hidden');
-        }
-
         function renderDonations(donations) {
             const container = document.getElementById('donationsList');
             if (!donations.length) {
@@ -915,71 +1080,38 @@
             }
 
             let html = donations.map(d => {
-                const isPaid = d.payment_status === 'Paid';
+                const status = d.payment_status || 'Paid';
                 const isAdmin = currentUser?.is_super_user;
+                const statusColor = status === 'Paid' ? 'bg-green-100 text-green-700' :
+                                    status === 'Partially Paid' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700';
 
-                return `<div class="p-4 hover:bg-slate-50 relative">
-                    ${isAdmin ? `<button onclick="openDelete('donation', '${d.id}', '${d.donor_name}', ${d.amount})" class="absolute top-4 right-4 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Delete"><i class="ph ph-trash text-lg"></i></button>` : ''}
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h4 class="font-semibold">${d.donor_name}</h4>
-                            <p class="text-sm text-slate-500">By: ${d.collector_name}</p>
-                        </div>
+                return `<div class="p-4 hover:bg-slate-50 flex items-center justify-between gap-4">
+                    <div class="min-w-0 flex-1">
+                        <h4 class="font-semibold text-slate-800 truncate">${escapeHtml(d.donor_name)}</h4>
+                        <p class="text-sm text-slate-500 truncate">By: ${escapeHtml(d.collector_name)}</p>
+                        ${d.notes ? `<p class="text-xs text-slate-400 mt-0.5 italic">Note: ${escapeHtml(d.notes)}</p>` : ''}
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
                         <div class="text-right">
-                            <p class="text-lg font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">₹${d.amount.toLocaleString('en-IN')}</p>
-                            <span class="text-xs px-2 py-1 ${isPaid ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} rounded">
-                                ${isPaid ? 'Paid' : 'Unpaid'}
-                            </span>
-                            ${isAdmin ? `
-                                <button onclick="toggleDonationStatus('${d.id}', '${isPaid ? 'Unpaid' : 'Paid'}')"
-                                    class="ml-2 text-xs px-2 py-1 rounded ${
-                                        isPaid
-                                            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                    }">
-                                    Mark ${isPaid ? 'Unpaid' : 'Paid'}
-                                </button>
-                            ` : ''}
-                            ${isAdmin && !isPaid ? `
-                                <button onclick="openEditDonation('${d.id}', '${d.donor_name}', ${d.amount})"
-                                    class="ml-2 text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">
-                                    Edit Amount
-                                </button>
-                            ` : ''}
+                            <p class="text-lg font-bold text-slate-800">₹${d.amount.toLocaleString('en-IN')}</p>
+                            <div class="flex items-center justify-end gap-1 mt-1">
+                                <span class="text-xs px-2 py-0.5 ${statusColor} rounded font-medium">${status}</span>
+                                ${isAdmin ? `<button onclick="openEditDonation('${d.id}', '${escapeHtml(d.donor_name).replace(/'/g, "\\'")}', ${d.amount}, '${status}', '${escapeHtml(d.notes || '').replace(/'/g, "\\'")}')" class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200">Edit</button>` : ''}
+                            </div>
                         </div>
+                        ${isAdmin ? `<button onclick="openDelete('donation', '${d.id}', '${escapeHtml(d.donor_name).replace(/'/g, "\\'")}', ${d.amount})" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition shrink-0" title="Delete"><i class="ph ph-trash text-lg"></i></button>` : ''}
                     </div>
                 </div>`;
             }).join('');
             container.innerHTML = html;
         }
 
-        async function toggleDonationStatus(donationId, newStatus) {
-            if (!currentUser || !currentUser.is_super_user) {
-                showToast('Only admins can change donation status', 'error');
-                return;
-            }
-
-            const { error } = await db
-                .from('donations')
-                .update({ payment_status: newStatus })
-                .eq('id', donationId);
-
-            if (error) {
-                console.error('Update status error:', error);
-                showToast('Update failed: ' + error.message, 'error');
-                return;
-            }
-
-            showToast('Donation status updated');
-            await loadAllData();
-        }
-
-        // ----- Edit donation amount (Unpaid only) -----
-
-        function openEditDonation(donationId, donorName, currentAmount) {
-            editDonationTarget = { id: donationId, donorName, currentAmount };
-            document.getElementById('editDonationModalMessage').textContent = `Donor: ${donorName} • Current: ₹${currentAmount}`;
+        function openEditDonation(donationId, donorName, currentAmount, currentStatus, currentNotes) {
+            editDonationTarget = { id: donationId };
+            document.getElementById('editDonationModalMessage').textContent = `Donor: ${donorName}`;
             document.getElementById('editDonationAmountInput').value = currentAmount;
+            document.getElementById('editDonationStatusInput').value = currentStatus;
+            document.getElementById('editDonationNotesInput').value = currentNotes || '';
             document.getElementById('editDonationModal').classList.remove('hidden');
         }
 
@@ -992,29 +1124,25 @@
             if (!editDonationTarget) return;
 
             const newAmount = parseFloat(document.getElementById('editDonationAmountInput').value);
-            if (!newAmount || newAmount <= 0) {
-                showToast('Enter a valid amount', 'error');
-                return;
-            }
+            const newStatus = document.getElementById('editDonationStatusInput').value;
+            const newNotes = document.getElementById('editDonationNotesInput').value;
+
+            if (!newAmount || newAmount <= 0) { showToast('Enter a valid amount', 'error'); return; }
 
             const { error } = await db
                 .from('donations')
-                .update({ amount: newAmount })
+                .update({ amount: newAmount, payment_status: newStatus, notes: newNotes })
                 .eq('id', editDonationTarget.id);
 
-            if (error) {
-                console.error('Edit amount error:', error);
-                showToast('Update failed: ' + error.message, 'error');
-                return;
-            }
+            if (error) { showToast('Update failed: ' + error.message, 'error'); return; }
 
-            showToast('Donation amount updated');
+            showToast('Donation updated!');
             closeEditDonationModal();
             await loadAllData();
         }
 
         async function updateDashboard(isAdmin) {
-            let donationsQuery = db.from('donations').select('*').eq('payment_status', 'Paid');
+            let donationsQuery = db.from('donations').select('*').in('payment_status', ['Paid', 'Partially Paid']);
             let expensesQuery = db.from('expenses').select('*');
 
             if (!isAdmin) {
@@ -1022,10 +1150,7 @@
                 expensesQuery = expensesQuery.eq('event_code', currentEventCode);
             }
 
-            const [{ data: expenses }, { data: donations }] = await Promise.all([
-                expensesQuery,
-                donationsQuery
-            ]);
+            const [{ data: expenses }, { data: donations }] = await Promise.all([expensesQuery, donationsQuery]);
 
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
             const totalExp = (expenses || []).reduce((s, e) => s + e.amount, 0);
@@ -1050,27 +1175,15 @@
 
         async function confirmDelete() {
             if (!deleteTarget) return;
-            
             try {
                 const table = deleteTarget.type === 'expense' ? 'expenses' : 'donations';
-                const { data, error } = await db.from(table).delete().eq('id', deleteTarget.id).select();
-                
-                if (error) {
-                    console.error('Delete error:', error);
-                    showToast('Delete failed: ' + error.message, 'error');
-                    closeDeleteModal();
-                    return;
-                }
+                const { error } = await db.from(table).delete().eq('id', deleteTarget.id);
+                if (error) throw error;
 
                 showToast('Deleted successfully!');
                 closeDeleteModal();
-                
-                setTimeout(() => {
-                    loadAllData();
-                }, 500);
-                
+                loadAllData();
             } catch (err) {
-                console.error('Delete error:', err);
                 showToast('Delete failed: ' + err.message, 'error');
                 closeDeleteModal();
             }
@@ -1078,20 +1191,9 @@
 
         document.getElementById('expenseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const select = document.getElementById('expenseItemSelect');
             const otherInput = document.getElementById('expenseItemOther');
-
-            let itemValue;
-            if (select.value === '__OTHER__') {
-                itemValue = otherInput.value.trim();
-                if (!itemValue) {
-                    showToast('Enter category name', 'error');
-                    return;
-                }
-            } else {
-                itemValue = select.value;
-            }
+            let itemValue = select.value === '__OTHER__' ? otherInput.value.trim() : select.value;
 
             try {
                 await db.from('expenses').insert([{
@@ -1107,11 +1209,8 @@
                 showToast('Expense added!');
                 e.target.reset();
                 otherInput.classList.add('hidden');
-                otherInput.required = false;
                 loadAllData();
-            } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
-            }
+            } catch (err) { showToast('Failed: ' + err.message, 'error'); }
         });
 
         document.getElementById('donationForm').addEventListener('submit', async (e) => {
@@ -1124,14 +1223,13 @@
                     payment_mode: document.querySelector('input[name="donationMode"]:checked').value,
                     payment_status: document.getElementById('paymentStatus').value,
                     collector_name: document.getElementById('collectorName').value,
-                    collector_mobile: currentUser.mobile || ''
+                    collector_mobile: currentUser.mobile || '',
+                    notes: document.getElementById('donationNotes').value
                 }]);
                 showToast('Donation recorded!');
                 e.target.reset();
                 loadAllData();
-            } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
-            }
+            } catch (err) { showToast('Failed: ' + err.message, 'error'); }
         });
 
         document.getElementById('categoryForm').addEventListener('submit', async (e) => {
@@ -1141,9 +1239,7 @@
                 showToast('Category added!');
                 e.target.reset();
                 loadCategories();
-            } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
-            }
+            } catch (err) { showToast('Failed: ' + err.message, 'error'); }
         });
 
         async function deleteCategory(name) {
@@ -1152,9 +1248,45 @@
                 await db.from('categories').delete().eq('event_code', currentEventCode).eq('name', name);
                 showToast('Deleted!');
                 loadCategories();
-            } catch (err) {
-                showToast('Failed: ' + err.message, 'error');
+            } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+        }
+
+        async function loadUsersTab() {
+            const container = document.getElementById('usersList');
+            if (!currentUser || !currentUser.is_super_user) return;
+            container.innerHTML = `<div class="text-center py-8 text-slate-400">Loading users...</div>`;
+
+            const { data: users, error: usersError } = await db
+                .from('users')
+                .select('id, name, mobile, event_code, is_super_user, created_at')
+                .order('created_at', { ascending: true });
+
+            if (usersError) {
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">Failed: ${escapeHtml(usersError.message)}</div>`;
+                return;
             }
+
+            container.innerHTML = users.map(user => `
+                <div class="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${user.is_super_user ? 'bg-orange-100' : 'bg-slate-100'}">
+                            <i class="ph ph-user ${user.is_super_user ? 'text-orange-600' : 'text-slate-500'}"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800">${escapeHtml(user.name || 'User')}</p>
+                            <p class="text-sm text-slate-500">${escapeHtml(user.mobile || '-')} • <span class="font-mono text-xs">${escapeHtml(user.event_code || '')}</span></p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${user.is_super_user ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-600'}">
+                        ${user.is_super_user ? 'Super User' : 'Member'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function toggleDetails(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
         }
 
         function escapeHtml(value) {
@@ -1177,9 +1309,7 @@
             active.classList.add('active', 'border-orange-500', 'text-orange-600');
             active.classList.remove('border-transparent', 'text-slate-600');
 
-            if (tab === 'users' && currentUser?.is_super_user) {
-                loadUsersTab();
-            }
+            if (tab === 'users' && currentUser?.is_super_user) loadUsersTab();
         }
 
         function showToast(msg, type = 'success') {
@@ -1201,20 +1331,9 @@
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
             const totalExp = (expenses || []).reduce((s, e) => s + e.amount, 0);
             
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-                ['Summary'],
-                ['Total Funds', totalFunds],
-                ['Total Expenses', totalExp],
-                ['Balance', totalFunds - totalExp]
-            ]), 'Summary');
-            
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-                ['Item', 'Amount', 'Mode', 'Paid By', 'Spender', 'Mobile', 'Notes', 'Date']
-            ].concat((expenses || []).map(e => [e.item, e.amount, e.payment_mode, e.paid_by, e.spender_name || '-', e.mobile, e.notes || '', new Date(e.created_at).toLocaleDateString()]))), 'Expenses');
-            
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-                ['Donor', 'Amount', 'Mode', 'Status', 'Collector', 'Date']
-            ].concat((donations || []).map(d => [d.donor_name, d.amount, d.payment_mode, d.payment_status, d.collector_name, new Date(d.created_at).toLocaleDateString()]))), 'Donations');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Summary'], ['Total Funds', totalFunds], ['Total Expenses', totalExp], ['Balance', totalFunds - totalExp]]), 'Summary');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Item', 'Amount', 'Mode', 'Paid By', 'Spender', 'Mobile', 'Notes', 'Date']].concat((expenses || []).map(e => [e.item, e.amount, e.payment_mode, e.paid_by, e.spender_name || '-', e.mobile, e.notes || '', new Date(e.created_at).toLocaleDateString()]))), 'Expenses');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Donor', 'Amount', 'Mode', 'Status', 'Collector', 'Notes', 'Date']].concat((donations || []).map(d => [d.donor_name, d.amount, d.payment_mode, d.payment_status, d.collector_name, d.notes || '', new Date(d.created_at).toLocaleDateString()]))), 'Donations');
             
             XLSX.writeFile(wb, `Festival_${currentEventCode}_${new Date().toISOString().split('T')[0]}.xlsx`);
             showToast('Downloaded!');
@@ -1228,8 +1347,7 @@
 
             const totalFunds = (donations || []).reduce((s, d) => s + d.amount, 0);
             const totalExp = (expenses || []).reduce((s, e) => s + e.amount, 0);
-            
-            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\n_Generated via Ganesh Utsav Finance Manager`;
+            const msg = `🎉 Festival Report\n💰 Collected: ₹${totalFunds}\n📝 Spent: ₹${totalExp}\n💵 Balance: ₹${totalFunds - totalExp}\n\n_Generated via Ganesh Utsav Finance Manager_`;
             
             await navigator.clipboard.writeText(msg);
             showToast('Copied to clipboard!');
